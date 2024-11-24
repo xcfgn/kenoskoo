@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kenan Yıldız Extras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #333;
+            margin-top: 20px;
+        }
+        .disclaimer {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .disclaimer a {
+            text-decoration: none;
+            font-size: 16px;
+            color: #007BFF;
+        }
+        .disclaimer a:hover {
+            text-decoration: underline;
+        }
+        .video-container {
+            margin: 40px auto;
+            width: 80%;
+            max-width: 800px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        iframe {
+            width: 100%;
+            height: 450px;
+            border: none;
+        }
+        .button-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .button-container button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+            transition: background-color 0.3s;
+        }
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kenan Yıldız Extras</h1>
+
+    <!-- Değiştirilebilir Video Kaynakları -->
+    <div class="video-container">
+        <iframe id="videoFrame" src="https://dood.li/e/nsbq9jwvceo5" allowfullscreen></iframe>
+    </div>
+    <div class="button-container">
+        <button onclick="changeSource('https://dood.li/e/nsbq9jwvceo5')">Source 1 "dood.li" </button>
+        <button onclick="changeSource('https://ok.ru/videoembed/8563755256566?nochat=1')">Source 2 "ok.ru" </button>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+        <a href="disclaimer.html" title="Feragatname">Disclaimer</a>
+    </div>
+
+    <script>
+        // Kaynağı değiştiren fonksiyon
+        function changeSource(url) {
+            const videoFrame = document.getElementById('videoFrame');
+            videoFrame.src = url;
+        }
+    </script>
+</body>
+</html>
