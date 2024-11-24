@@ -84,6 +84,14 @@
     <a href="index.html" style="text-decoration: none; color: inherit;">Kenan Yıldız Extras</a>
 </h1>
 
+    <div id="warningModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000;">
+    <div style="position: relative; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 400px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+        <h2>Warning</h2>
+        <p>Dood.li might give you pop ups, if you dont want to deal with it just use the other source. Also if you are in certain countries like Turkey, dood.li might not open. Eğer geçici olarak kullanılamıyor hatası alırsanız diğer kaynağa geçiniz.</p>
+        <button onclick="closeWarning()" style="padding: 10px 20px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">OK</button>
+    </div>
+</div>
+
     <!-- Değiştirilebilir Video Kaynakları -->
     <div class="video-container">
         <div class="video-info">
@@ -100,6 +108,16 @@
     <div class="disclaimer">
         <a href="disclaimer.html" title="Feragatname">Disclaimer</a>
     </div>
+
+    	<script>
+    window.onload = function() {
+        document.getElementById("warningModal").style.display = "block";
+    };
+
+    function closeWarning() {
+        document.getElementById("warningModal").style.display = "none";
+    }
+</script>
 
     <script>
         // Kaynağı değiştiren fonksiyon
