@@ -62,9 +62,9 @@
         <video id="video" class="video-js vjs-default-skin" controls></video>
     </div>
 
-    <!-- Video.js and Video.js HLS Plugin -->
+    <!-- Video.js and Video.js VHS Plugin -->
     <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@5.15.0/dist/videojs-contrib-hls.min.js"></script>
+    <script src="https://vjs.zencdn.net/vhs/2.10.0/vhs.min.js"></script>
 
     <script>
         const videoElement = document.getElementById('video');
@@ -91,11 +91,11 @@
                 player.dispose();
             }
 
-            // Create a new video.js player instance
+            // Create a new video.js player instance with VHS for HLS support
             player = videojs(videoElement, {
                 techOrder: ['html5'],
                 html5: {
-                    hls: {
+                    vhs: {
                         withCredentials: true, // Optional, set to true if CORS credentials are needed
                     }
                 }
