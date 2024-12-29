@@ -117,6 +117,14 @@
                 alert('Failed to load the stream. Please check the URL.');
                 recordBtn.disabled = true;
             });
+
+            // Trigger recording setup after the video has started playing
+            player.on('play', () => {
+                // Ensure captureStream is called after the player starts
+                if (recording && !stream) {
+                    startRecording(); // Start recording once the player is playing
+                }
+            });
         }
 
         // Start recording
@@ -126,6 +134,7 @@
                 return;
             }
 
+            // Use captureStream() after the player is playing
             stream = player.el().captureStream();
             recordedChunks = [];
 
@@ -185,7 +194,7 @@
         });
 
         // Set a default stream for testing (optional)
-        hlsUrlInput.value = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'; // Optional default stream
+        hlsUrlInput.value = 'https://test-streams.mux.dev/test_001/stream.m3u8'; // Optional default stream
         initializePlayer(hlsUrlInput.value); // Automatically load the stream
     </script>
 </body>
