@@ -96,13 +96,15 @@
                 techOrder: ['html5'],
                 html5: {
                     vhs: {
-                        withCredentials: false, // Optional, set to true if CORS credentials are needed
+                        withCredentials: false, // Disable credentials for cross-origin requests
                     }
                 }
             });
 
+            // Set the video source
             player.src({ type: 'application/x-mpegURL', src: url });
 
+            // Wait until the player is ready before enabling the recording button
             player.ready(function() {
                 console.log('Player ready');
                 recordBtn.disabled = false; // Enable record button once the stream loads
@@ -149,6 +151,8 @@
 
             mediaRecorder.start();
             console.log('Recording started');
+            recordBtn.textContent = 'Stop Recording'; // Change button text
+            recording = true;
         }
 
         // Stop recording
@@ -156,7 +160,7 @@
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
                 console.log('Recording stopped');
-                recordBtn.textContent = 'Start Recording';
+                recordBtn.textContent = 'Start Recording'; // Change button text
                 recording = false;
             }
         }
@@ -167,20 +171,22 @@
                 stopRecording();
             } else {
                 startRecording();
-                recordBtn.textContent = 'Stop Recording';
-                recording = true;
             }
         });
 
         // Load a new stream
         loadStreamBtn.addEventListener('click', () => {
             const url = hlsUrlInput.value.trim();
-            initializePlayer(url);
+            if (url) {
+                initializePlayer(url);
+            } else {
+                alert('Please enter a valid HLS URL!');
+            }
         });
 
         // Set a default stream for testing (optional)
         hlsUrlInput.value = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'; // Optional default stream
-        initializePlayer(hlsUrlInput.value);
+        initializePlayer(hlsUrlInput.value); // Automatically load the stream
     </script>
 </body>
 </html>
