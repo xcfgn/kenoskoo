@@ -78,7 +78,7 @@
         let stream;
         let recording = false;
 
-        // Initialize Video.js player
+        // Initialize or reset the Video.js player
         function initializePlayer(url) {
             // Check if HLS URL is valid
             if (!url || !url.trim()) {
@@ -86,9 +86,10 @@
                 return;
             }
 
-            // Dispose of the old player if it exists
+            // Only dispose of the old player if it's already initialized
             if (player) {
-                player.dispose();
+                player.src({}); // Temporarily remove the current source
+                player.reset(); // Reset the player without disposing it
             }
 
             // Create a new video.js player instance with VHS for HLS support
@@ -184,7 +185,7 @@
         });
 
         // Set a default stream for testing (optional)
-        hlsUrlInput.value = 'https://test-streams.mux.dev/test_001/stream.m3u8'; // Optional default stream
+        hlsUrlInput.value = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'; // Optional default stream
         initializePlayer(hlsUrlInput.value); // Automatically load the stream
     </script>
 </body>
