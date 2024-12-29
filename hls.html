@@ -45,6 +45,9 @@
         button:hover {
             background-color: #0056b3;
         }
+        .vjs-error-display {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -77,8 +80,15 @@
 
         // Initialize Video.js player
         function initializePlayer(url) {
+            // Check if HLS URL is valid
+            if (!url || !url.trim()) {
+                alert('Please enter a valid HLS stream URL.');
+                return;
+            }
+
+            // Dispose of the old player before creating a new one
             if (player) {
-                player.dispose(); // Dispose of the old player before creating a new one
+                player.dispose();
             }
 
             // Create a new video.js player instance
@@ -98,10 +108,12 @@
                 recordBtn.disabled = false; // Enable record button once the stream loads
             });
 
+            // Error handling when the stream fails to load
             player.on('error', (e) => {
                 console.error('Video.js error:', e);
                 alert('Failed to load the stream. Please check the URL.');
                 recordBtn.disabled = true;
+                player.dispose(); // Dispose the player if error occurs
             });
         }
 
