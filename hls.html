@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HLS Recorder</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- Video.js Stylesheet -->
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,11 +28,6 @@
         }
         #controls {
             margin-bottom: 20px;
-        }
-        video {
-            width: 100%;
-            max-width: 100%;
-            margin-bottom: 10px;
         }
         input, button {
             padding: 10px;
@@ -59,67 +55,64 @@
             <button id="loadStreamBtn">Load Stream</button>
             <button id="recordBtn" disabled>Start Recording</button>
         </div>
-        <video id="video" controls></video>
+        <!-- Video.js Player -->
+        <video id="video" class="video-js vjs-default-skin" controls></video>
     </div>
 
+    <!-- Video.js and Video.js HLS Plugin -->
+    <script src="https://vjs.zencdn.net/7.15.4/video.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@5.15.0/dist/videojs-contrib-hls.min.js"></script>
+
     <script>
-        const video = document.getElementById('video');
+        const videoElement = document.getElementById('video');
         const recordBtn = document.getElementById('recordBtn');
         const loadStreamBtn = document.getElementById('loadStreamBtn');
         const hlsUrlInput = document.getElementById('hlsUrl');
-
-        let hls;
-        let recording = false;
+        
+        let player;
         let mediaRecorder;
         let recordedChunks = [];
         let stream;
+        let recording = false;
 
-        // Initialize HLS.js and playback
+        // Initialize Video.js player
         function initializePlayer(url) {
-            // Cleanup any existing player
-            if (hls) {
-                hls.destroy();
+            if (player) {
+                player.dispose(); // Dispose of the old player before creating a new one
             }
 
-            // Ensure URL is valid
-            if (!url || !url.trim()) {
-                alert('Please enter a valid HLS stream URL.');
-                return;
-            }
+            // Create a new video.js player instance
+            player = videojs(videoElement, {
+                techOrder: ['html5'],
+                html5: {
+                    hls: {
+                        withCredentials: true, // Optional, set to true if CORS credentials are needed
+                    }
+                }
+            });
 
-            // Check if hls.js is supported by the browser
-            if (Hls.isSupported()) {
-                hls = new Hls();
-                hls.loadSource(url);
-                hls.attachMedia(video);
+            player.src({ type: 'application/x-mpegURL', src: url });
 
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    console.log('HLS Manifest loaded');
-                    recordBtn.disabled = false; // Enable record button
-                });
+            player.ready(function() {
+                console.log('Player ready');
+                recordBtn.disabled = false; // Enable record button once the stream loads
+            });
 
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    console.error('HLS error:', data);
-                    alert('Failed to load the stream. Please check the URL.');
-                    recordBtn.disabled = true;
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
-                recordBtn.disabled = false; // Enable record button for native browser support
-            } else {
-                alert('HLS is not supported in this browser.');
+            player.on('error', (e) => {
+                console.error('Video.js error:', e);
+                alert('Failed to load the stream. Please check the URL.');
                 recordBtn.disabled = true;
-            }
+            });
         }
 
         // Start recording
         function startRecording() {
-            if (!video.src) {
-                alert('No video source found!');
+            if (!player || !player.paused()) {
+                alert('Please load a valid stream!');
                 return;
             }
 
-            stream = video.captureStream();
+            stream = player.el().captureStream();
             recordedChunks = [];
 
             mediaRecorder = new MediaRecorder(stream, {
