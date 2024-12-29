@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HLS Recorder with Delay</title>
+    <title>HLS Recorder</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body {
@@ -53,11 +53,9 @@
 </head>
 <body>
     <div id="container">
-        <h1>HLS Recorder with Delay</h1>
+        <h1>HLS Recorder</h1>
         <div id="controls">
             <input type="text" id="hlsUrl" placeholder="Enter HLS Stream URL (e.g., .m3u8)" />
-            <label for="delay">Delay (ms): </label>
-            <input type="number" id="delay" value="5000" min="0" step="100">
             <button id="loadStreamBtn">Load Stream</button>
             <button id="recordBtn" disabled>Start Recording</button>
         </div>
@@ -67,7 +65,6 @@
     <script>
         const video = document.getElementById('video');
         const recordBtn = document.getElementById('recordBtn');
-        const delayInput = document.getElementById('delay');
         const loadStreamBtn = document.getElementById('loadStreamBtn');
         const hlsUrlInput = document.getElementById('hlsUrl');
 
@@ -82,18 +79,21 @@
             if (hls) {
                 hls.destroy(); // Clean up any existing player
             }
+
+            // Ensure URL is valid
+            if (!url || !url.trim()) {
+                alert('Please enter a valid HLS stream URL.');
+                return;
+            }
+
             if (Hls.isSupported()) {
-                hls = new Hls({
-                    enableWorker: true, // Use worker threads for performance
-                    maxBufferLength: 10, // Buffer length in seconds (adjust for low-lag playback)
-                    maxMaxBufferLength: 30, // Maximum buffer length
-                });
+                hls = new Hls();
                 hls.loadSource(url);
                 hls.attachMedia(video);
 
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     console.log('HLS Manifest loaded');
-                    recordBtn.disabled = false; // Enable the record button
+                    recordBtn.disabled = false; // Enable the record button after stream is loaded
                 });
 
                 hls.on(Hls.Events.ERROR, (event, data) => {
@@ -103,7 +103,7 @@
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
-                recordBtn.disabled = false;
+                recordBtn.disabled = false; // Enable the record button for native browser support
             } else {
                 alert('HLS is not supported in this browser.');
                 recordBtn.disabled = true;
@@ -112,18 +112,11 @@
 
         // Start recording
         function startRecording() {
-            const delay = parseInt(delayInput.value, 10);
-            if (isNaN(delay) || delay < 0) {
-                alert('Please enter a valid delay in milliseconds.');
-                return;
-            }
-
             stream = video.captureStream();
             recordedChunks = [];
 
             mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'video/webm; codecs=vp8',
-                videoBitsPerSecond: 1500000, // Lower bitrate for better performance
+                mimeType: 'video/webm; codecs=vp8', // Use vp8 for better browser compatibility
             });
 
             mediaRecorder.ondataavailable = (e) => {
@@ -142,10 +135,8 @@
                 document.body.removeChild(a);
             };
 
-            setTimeout(() => {
-                mediaRecorder.start(1000); // Record in 1-second chunks
-                console.log('Recording started');
-            }, delay);
+            mediaRecorder.start();
+            console.log('Recording started');
         }
 
         // Stop recording
@@ -171,15 +162,11 @@
         // Load a new stream
         loadStreamBtn.addEventListener('click', () => {
             const url = hlsUrlInput.value.trim();
-            if (!url) {
-                alert('Please enter a valid HLS stream URL.');
-                return;
-            }
             initializePlayer(url);
         });
 
         // Set a default stream for testing (optional)
-        hlsUrlInput.value = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+        hlsUrlInput.value = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'; // Optional default stream
         initializePlayer(hlsUrlInput.value);
     </script>
 </body>
