@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Recorder with Delay</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+    <h1>HLS Recorder with Delay</h1>
+    <div id="controls">
+        <label for="delay">Delay (ms): </label>
+        <input type="number" id="delay" value="5000" min="0" step="100">
+        <button id="recordBtn">Start Recording</button>
+    </div>
+    <video id="video" controls></video>
+    <script>
+        const video = document.getElementById('video');
+        const recordBtn = document.getElementById('recordBtn');
+        const delayInput = document.getElementById('delay');
+
+        let hls;
+        let recording = false;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let delayTimeout;
+
+        // Initialize HLS.js and playback
+        function initializePlayer(url) {
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    console.log('HLS Manifest loaded');
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+            } else {
+                alert('HLS is not supported in this browser.');
+            }
+        }
+
+        // Start recording
+        function startRecording() {
+            const delay = parseInt(delayInput.value, 10);
+            if (isNaN(delay) || delay < 0) {
+                alert('Please enter a valid delay in milliseconds.');
+                return;
+            }
+
+            // Delay playback
+            clearTimeout(delayTimeout);
+            delayTimeout = setTimeout(() => {
+                console.log('Starting delayed playback');
+            }, delay);
+
+            // Start capturing the video stream
+            const stream = video.captureStream();
+            recordedChunks = [];
+
+            mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm; codecs="vp9"',
+            });
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'recording.webm';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            mediaRecorder.start();
+            console.log('Recording started');
+        }
+
+        // Stop recording
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+            clearTimeout(delayTimeout);
+            console.log('Recording stopped');
+        }
+
+        // Toggle recording
+        recordBtn.addEventListener('click', () => {
+            if (recording) {
+                stopRecording();
+                recordBtn.textContent = 'Start Recording';
+            } else {
+                startRecording();
+                recordBtn.textContent = 'Stop Recording';
+            }
+            recording = !recording;
+        });
+
+        // Load the HLS stream (replace with your .m3u8 URL)
+        initializePlayer('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8');
+    </script>
+</body>
+</html>
