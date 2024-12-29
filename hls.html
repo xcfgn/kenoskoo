@@ -76,8 +76,9 @@
 
         // Initialize HLS.js and playback
         function initializePlayer(url) {
+            // Cleanup any existing player
             if (hls) {
-                hls.destroy(); // Clean up any existing player
+                hls.destroy();
             }
 
             // Ensure URL is valid
@@ -86,6 +87,7 @@
                 return;
             }
 
+            // Check if hls.js is supported by the browser
             if (Hls.isSupported()) {
                 hls = new Hls();
                 hls.loadSource(url);
@@ -93,7 +95,7 @@
 
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     console.log('HLS Manifest loaded');
-                    recordBtn.disabled = false; // Enable the record button after stream is loaded
+                    recordBtn.disabled = false; // Enable record button
                 });
 
                 hls.on(Hls.Events.ERROR, (event, data) => {
@@ -103,7 +105,7 @@
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
-                recordBtn.disabled = false; // Enable the record button for native browser support
+                recordBtn.disabled = false; // Enable record button for native browser support
             } else {
                 alert('HLS is not supported in this browser.');
                 recordBtn.disabled = true;
@@ -112,11 +114,16 @@
 
         // Start recording
         function startRecording() {
+            if (!video.src) {
+                alert('No video source found!');
+                return;
+            }
+
             stream = video.captureStream();
             recordedChunks = [];
 
             mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'video/webm; codecs=vp8', // Use vp8 for better browser compatibility
+                mimeType: 'video/webm; codecs=vp8', // WebM with VP8 codec
             });
 
             mediaRecorder.ondataavailable = (e) => {
@@ -143,20 +150,21 @@
         function stopRecording() {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
+                console.log('Recording stopped');
+                recordBtn.textContent = 'Start Recording';
+                recording = false;
             }
-            console.log('Recording stopped');
         }
 
         // Toggle recording
         recordBtn.addEventListener('click', () => {
             if (recording) {
                 stopRecording();
-                recordBtn.textContent = 'Start Recording';
             } else {
                 startRecording();
                 recordBtn.textContent = 'Stop Recording';
+                recording = true;
             }
-            recording = !recording;
         });
 
         // Load a new stream
